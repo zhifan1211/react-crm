@@ -1,0 +1,42 @@
+{
+  "name": "react-crm",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.6",
+    "datatables.net-bs5": "^2.3.2",
+    "datatables.net-buttons-bs5": "^3.2.3",
+    "datatables.net-buttons-dt": "^3.2.3",
+    "datatables.net-react": "^1.0.1",
+    "datatables.net-select-dt": "^3.0.1",
+    "datatables.net-zf": "^2.3.2",
+    "date-fns": "^4.1.0",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "pdfmake": "^0.2.20",
+    "react": "^18.2.0",
+    "react-data-table-component": "^7.7.0",
+    "react-datepicker": "^8.4.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.6.1",
+    "react-table": "^7.8.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "vite": "^5.1.6"
+  }
+}

@@ -1,0 +1,62 @@
+/* 登入背景灰色 */
+.login-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* 登入表單區塊 */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* 自訂按鈕樣式 */
+.btn {
+  background-color: #1F5673;
+  color: #fff;
+}
+
+.btn:hover {
+  background-color: #174558;
+  color: #fff;
+}
+
+/* 品牌文字樣式 */
+.brand-title {
+  color: #1F5673;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase; /* OTTER POINT 全部大寫 */
+}
+
+.brand-title_white {
+  color: #1F5673;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase; /* OTTER POINT 全部大寫 */
+}
+
+/* 超連結小字 */
+.link-like {
+  color: #1F5673;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link-like:hover {
+  color: #174558;
+}
+
+/* 品牌色文字 */
+.text-brand {
+  color: #1F5673;
+}
+
+.text-brand:hover {
+  color: #174558;
+}
+
+/* 品牌色背景 */
+.bg-brand {
+  background-color: #1F5673; 
+}
