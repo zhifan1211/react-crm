@@ -21,6 +21,23 @@
   color: #fff;
 }
 
+.btn-outline-brand {
+  background-color: #fff !important;
+  color: #1F5673 !important;
+  border: 1px solid #1F5673 !important;
+}
+
+.btn-disable-solid {
+  background-color: #90484C !important;
+  color: #fff !important;
+  border: none !important;
+}
+.btn-enable-solid {
+  background-color: #3D6E73 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
 /* 品牌文字樣式 */
 .brand-title {
   color: #1F5673;

@@ -122,9 +122,18 @@ function MemberRegisterPage() {
             <div>
               <DatePicker
                 selected={form.birthDate ? new Date(form.birthDate) : null}
-                onChange={(date) =>
-                  setForm((prev) => ({ ...prev, birthDate: date.toISOString().split("T")[0] }))
-                }
+                onChange={date => {
+                  if (!date) {
+                    setForm(prev => ({ ...prev, birthDate: "" }));
+                    return;
+                  }
+                  // 這裡不要用 toISOString()，要自己拼 YYYY-MM-DD（local）
+                  const yyyy = date.getFullYear();
+                  const mm = String(date.getMonth() + 1).padStart(2, "0");
+                  const dd = String(date.getDate()).padStart(2, "0");
+                  const dateString = `${yyyy}-${mm}-${dd}`;
+                  setForm(prev => ({ ...prev, birthDate: dateString }));
+                }}
                 locale={zhTW}
                 dateFormat="yyyy-MM-dd"
                 className="form-control"

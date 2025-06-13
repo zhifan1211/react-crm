@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Navbar from "./components/AdminNavbar";
+import DateRangeFilter from "./components/DateRangeFilter";
+import GlobalFilter from "./components/GlobalFilter";
 import {
   useTable,
   useSortBy,
@@ -9,43 +11,6 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-// 全欄位搜尋
-function GlobalFilter({ globalFilter, setGlobalFilter }) {
-  return (
-    <input
-      className="form-control"
-      style={{ maxWidth: 200, display: "inline-block", fontSize: "14px"}}
-      value={globalFilter || ""}
-      onChange={e => setGlobalFilter(e.target.value)}
-      placeholder="關鍵字搜尋…"
-    />
-  );
-}
-
-// 時間區間搜尋
-function DateRangeFilter({ startDate, endDate, setStartDate, setEndDate }) {
-  return (
-    <div className="d-flex align-items-center gap-2 mb-2">
-      <span style={{ fontSize: "14px" }}>時間區間：</span>
-      <input
-        type="datetime-local"
-        className="form-control"
-        style={{ maxWidth: 170, fontSize: "14px"}}
-        value={startDate}
-        onChange={e => setStartDate(e.target.value)}
-      />
-      <span style={{ fontSize: "14px" }}>～</span>
-      <input
-        type="datetime-local"
-        className="form-control"
-        style={{ maxWidth: 170, fontSize: "14px" }}
-        value={endDate}
-        onChange={e => setEndDate(e.target.value)}
-      />
-    </div>
-  );
-}
 
 function AdminPointListPage() {
   const [logs, setLogs] = useState([]);
@@ -81,9 +46,9 @@ function AdminPointListPage() {
     { Header: "紀錄編號", accessor: "logId" },
     { Header: "會員編號", accessor: "memberId", Cell: ({ value }) => value || "-" },
     { Header: "會員姓名", accessor: "memberName", Cell: ({ value }) => value || "-" },
-    { Header: "點數項目", accessor: "typeName" },
+    { Header: "類型名稱", accessor: "typeName" },
     {
-      Header: "點數種類", accessor: "category",
+      Header: "點數類別", accessor: "category",
       Cell: ({ value }) => value === "ADD" ? "派發" : "消耗"
     },
     {
@@ -172,8 +137,8 @@ function AdminPointListPage() {
       "紀錄編號": log.logId,
       "會員編號": log.memberId || "-",
       "會員姓名": log.memberName || "-",
-      "點數項目": log.typeName,
-      "點數種類": log.category === "ADD" ? "派發" : "消耗",
+      "類型名稱": log.typeName,
+      "點數類別": log.category === "ADD" ? "派發" : "消耗",
       "原始點數": log.category === "ADD" ? log.originalPoints : "-",
       "剩餘點數": log.category === "ADD" ? log.remainPoints ?? "-" : "-",
       "扣除點數": log.category === "CONSUME" ? log.originalPoints : "-",
@@ -200,21 +165,18 @@ function AdminPointListPage() {
     <div>
       <Navbar />
       <div className="container py-4">
-        <h5>點數紀錄列表</h5>
+        <h5 classname="mb-3">點數紀錄列表</h5>
         <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
-          <GlobalFilter
-            globalFilter={state.globalFilter}
-            setGlobalFilter={setGlobalFilter}
-          />
           <DateRangeFilter
             startDate={startDate}
             endDate={endDate}
             setStartDate={setStartDate}
             setEndDate={setEndDate}
           />
-          <button className="btn btn-light ms-auto" onClick={exportExcel}>
-            匯出 Excel
-          </button>
+          <GlobalFilter
+            globalFilter={state.globalFilter}
+            setGlobalFilter={setGlobalFilter}
+          />
         </div>
         {loading ? (
           <div>載入中...</div>
@@ -310,6 +272,9 @@ function AdminPointListPage() {
             </div>
           </div>
         )}
+        <button className="btn btn-sm me-auto" onClick={exportExcel}>
+          匯出 Excel
+        </button>
       </div>
     </div>
   );
