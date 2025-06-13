@@ -264,7 +264,7 @@ function AdminPointTypeList() {
                   placeholder="數字"
                 />
               </div>
-              <div className="col-md-3">
+              <div className="col-md-4">
                 <label className="form-label">描述</label>
                 <input
                   name="description"
@@ -275,7 +275,7 @@ function AdminPointTypeList() {
                   placeholder="簡要說明"
                 />
               </div>
-              <div className="col-md-2">
+              <div className="col">
                 <label className="form-label">啟用狀態</label>
                 <select
                   name="active"

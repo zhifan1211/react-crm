@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import AdminChangePasswordModal from "./AdminChangePasswordModal";
 
 function AdminNavbar() {
   const navigate = useNavigate();
   const [adminName, setAdminName] = useState("");
   const [unit, setUnit] = useState("");
+  const [showPwdModal, setShowPwdModal] = useState(false); // 控制 Modal
 
   // 處理登出按鈕點擊事件
   const handleLogout = async () => {
@@ -41,6 +43,14 @@ function AdminNavbar() {
       .catch((err) => console.error("管理者資訊讀取失敗", err));
   }, []);
 
+  // 密碼改完要登出
+  const handleClosePwdModal = (forceLogout = false) => {
+    setShowPwdModal(false);
+    if (forceLogout) {
+      setTimeout(() => handleLogout(), 500); // 密碼改完自動登出
+    }
+  };
+
   return (
     <nav className="navbar navbar-expand bg-white sticky-top shadow-sm py-3">
       <div className="container-fluid align-items-center">
@@ -73,7 +83,10 @@ function AdminNavbar() {
               管理後台
             </button>
           )}
-          <button className="btn btn-light me-3" onClick={() => navigate("/admin/change-password")}>
+          <button
+            className="btn btn-light me-3"
+            onClick={() => setShowPwdModal(true)}
+          >
             修改密碼
           </button>
           <button className="btn btn-light" onClick={handleLogout}>
@@ -81,6 +94,8 @@ function AdminNavbar() {
           </button>
         </div>
       </div>
+      {/* Modal元件掛在Navbar最外層 */}
+      <AdminChangePasswordModal show={showPwdModal} onClose={handleClosePwdModal} />
     </nav>
   );
 }
