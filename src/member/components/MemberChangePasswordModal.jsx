@@ -2,7 +2,7 @@ import { useState } from "react";
 import { API_BASE } from "../../config";
 import { showAlert, showConfirm } from "../../utils/alert";
 
-export default function AdminChangePasswordModal({ show, onClose }) {
+export default function MemberChangePasswordModal({ show, onClose }) {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -12,17 +12,17 @@ export default function AdminChangePasswordModal({ show, onClose }) {
     e.preventDefault();
 
     if (!oldPassword || !newPassword || !confirmNewPassword) {
-      showAlert({ title: "請填寫所有欄位" });
+      showAlert({ title: "請填寫所有欄位", icon: "warning" });
       return;
     }
     if (newPassword !== confirmNewPassword) {
-      showAlert({ title: "新密碼與確認密碼不一致" });
+      showAlert({ title: "新密碼與確認密碼不一致", icon: "warning" });
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/change-password`, {
+      const res = await fetch(`${API_BASE}/member/edit/change-password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -31,7 +31,7 @@ export default function AdminChangePasswordModal({ show, onClose }) {
       const resData = await res.json();
 
       if (res.ok && resData.status === 200) {
-        showAlert({ title: "密碼修改成功，請重新登入", icon: "success" });
+        showAlert({ title: "密碼修改成功", icon: "success" });
         setOldPassword("");
         setNewPassword("");
         setConfirmNewPassword("");
@@ -66,7 +66,7 @@ export default function AdminChangePasswordModal({ show, onClose }) {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content p-2">
             <div className="modal-header">
-              <h5 className="modal-title">修改密碼</h5>
+              <h5 className="modal-title">變更密碼</h5>
               <button type="button" className="btn-close" onClick={() => onClose()}></button>
             </div>
             <form onSubmit={handleSubmit}>
@@ -104,7 +104,7 @@ export default function AdminChangePasswordModal({ show, onClose }) {
               </div>
               <div className="modal-footer justify-content-center">
                 <button type="submit" className="btn" disabled={loading}>
-                  {loading ? "處理中..." : "送出修改"}
+                  {loading ? "處理中..." : "送出變更"}
                 </button>
               </div>
             </form>

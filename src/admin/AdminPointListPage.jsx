@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Navbar from "./components/AdminNavbar";
 import DateRangeFilter from "./components/DateRangeFilter";
 import GlobalFilter from "./components/GlobalFilter";
+import { API_BASE } from "../config";
 import {
   useTable,
   useSortBy,
@@ -11,6 +12,7 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { showAlert, showConfirm } from "../utils/alert";
 
 function AdminPointListPage() {
   const [logs, setLogs] = useState([]);
@@ -22,17 +24,17 @@ function AdminPointListPage() {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8081/admin/point-list", {
+      const res = await fetch(`${API_BASE}/admin/point-list`, {
         credentials: "include",
       });
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
         setLogs(resData.data || []);
       } else {
-        alert("載入失敗：" + (resData.message ?? "未知錯誤"));
+        showAlert({ title: "載入失敗", text: resData.message ?? "未知錯誤", icon: "error" });
       }
     } catch (err) {
-      alert("歷程錯誤：" + err.message);
+      showAlert({ title: "歷程錯誤", text: err.message, icon: "error" });
     }
     setLoading(false);
   };
@@ -222,16 +224,19 @@ function AdminPointListPage() {
                 ) : (
                   page.map(row => {
                     prepareRow(row);
+                    // 正確方式：將 key 從 row.getRowProps() 拿出來
+                    const { key: rowKey, ...rowProps } = row.getRowProps();
                     return (
-                      <tr {...row.getRowProps()}>
-                        {row.cells.map(cell => (
-                          <td
-                            {...cell.getCellProps()}
-                            style={{ fontSize: "13px" }}
-                          >
-                            {cell.render("Cell")}
-                          </td>
-                        ))}
+                      <tr key={rowKey} {...rowProps}>
+                        {row.cells.map(cell => {
+                          // 同理，cell 的 key 也這樣寫
+                          const { key: cellKey, ...cellProps } = cell.getCellProps();
+                          return (
+                            <td key={cellKey} {...cellProps} style={{ fontSize: "13px" }}>
+                              {cell.render("Cell")}
+                            </td>
+                          );
+                        })}
                       </tr>
                     );
                   })

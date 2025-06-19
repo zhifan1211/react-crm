@@ -27,6 +27,12 @@
   border: 1px solid #1F5673 !important;
 }
 
+.btn-outline-brand:hover {
+  background-color: #fff !important;
+  color: #174558 !important;
+  border: 1px solid #174558 !important;
+}
+
 .btn-disable-solid {
   background-color: #90484C !important;
   color: #fff !important;
@@ -76,4 +82,12 @@
 /* 品牌色背景 */
 .bg-brand {
   background-color: #1F5673; 
+}
+
+.bg-enable{
+  background-color: #3D6E73; 
+}
+
+.bg-disable{
+  background-color: #90484C; 
 }

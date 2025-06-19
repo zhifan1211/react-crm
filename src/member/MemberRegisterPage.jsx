@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { zhTW } from "date-fns/locale";
+import { API_BASE } from "../config";
+import { showAlert, showConfirm } from "../utils/alert";
 
 function MemberRegisterPage() {
   const navigate = useNavigate();
@@ -22,7 +24,7 @@ function MemberRegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8081/member/register", {
+      const res = await fetch(`${API_BASE}/member/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -30,13 +32,13 @@ function MemberRegisterPage() {
       const resData = await res.json();
 
       if (res.ok && resData.status === 200) {
-        alert("註冊成功！");
+        showAlert({ title: "註冊成功！", icon: "success" });
         navigate("/member/login");
       } else {
-        alert("註冊失敗：" + resData.message);
+        showAlert({ title: "註冊失敗", text: resData.message || "", icon: "error" });
       }
     } catch (err) {
-      alert("錯誤：" + err.message);
+      showAlert({ title: "錯誤", text: err.message, icon: "error" });
     }
   };
 

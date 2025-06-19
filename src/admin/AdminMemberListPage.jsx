@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "./components/AdminNavbar";
 import GlobalFilter from "./components/GlobalFilter";
 import DateRangeFilter from "./components/DateRangeFilter";
+import StatusFilter from "./components/StatusFilter";
+import { API_BASE } from "../config";
+import { showAlert, showConfirm } from "../utils/alert";
+
 import {
   useTable,
   useSortBy,
@@ -26,7 +30,7 @@ function AdminMemberList() {
   const fetchMembers = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8081/admin/member", {
+      const res = await fetch(`${API_BASE}/admin/member`, {
         method: "GET",
         credentials: "include",
       });
@@ -34,10 +38,10 @@ function AdminMemberList() {
       if (res.ok && resData.status === 200) {
         setMembers(resData.data);
       } else {
-        alert("載入會員失敗：" + resData.message);
+        showAlert({ title: "載入會員失敗", text: resData.message || "", icon: "error" });
       }
     } catch (err) {
-      alert("錯誤：" + err.message);
+      showAlert({ title: "錯誤", text: err.message, icon: "error" });
     }
     setLoading(false);
   };
@@ -134,13 +138,16 @@ function AdminMemberList() {
           <button
             className={`btn btn-sm ${row.original.active ? "btn-disable-solid" : "btn-enable-solid"}`}
             onClick={async () => {
-              const confirmMsg = row.original.active
-                ? "確定要停用該會員？"
-                : "確定要重新啟用該會員？";
-              if (!window.confirm(confirmMsg)) return;
+              const result = await showConfirm({
+                title: row.original.active ? "確定要停用該會員？" : "確定要重新啟用該會員？",
+                icon: "warning",
+                confirmButtonText: "確定",
+                cancelButtonText: "取消",
+              });
+              if (!result.isConfirmed) return;
               try {
                 const res = await fetch(
-                  `http://localhost:8081/admin/member/${row.original.memberId}/toggle-active`,
+                  `https://localhost:8443/admin/member/${row.original.memberId}/toggle-active`,
                   {
                     method: "PATCH",
                     credentials: "include",
@@ -148,13 +155,13 @@ function AdminMemberList() {
                 );
                 const resData = await res.json();
                 if (res.ok && resData.status === 200) {
-                  alert("狀態切換成功！");
+                  showAlert({ title: "狀態切換成功！", icon: "success" });
                   fetchMembers(); // 重新載入
                 } else {
-                  alert("切換失敗：" + resData.message);
+                  showAlert({ title: "切換失敗", text: resData.message || "", icon: "error" });
                 }
               } catch (err) {
-                alert("錯誤：" + err.message);
+                showAlert({ title: "錯誤", text: err.message, icon: "error" });
               }
             }}
           >
@@ -234,7 +241,7 @@ function AdminMemberList() {
     <div>
       <Navbar />
       <div className="container py-4">
-        <h5 className="mb-3">會員列表</h5>
+        <h5 className="mb-3">會員管理列表</h5>
 
         {/* 篩選、搜尋 */}
         <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
@@ -246,29 +253,7 @@ function AdminMemberList() {
           />
         </div>
         <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
-          <div className="btn-group mb-2">
-            <button
-              type="button"
-              className={`btn btn-sm ${filterStatus === "ACTIVE" ? "btn-brand" : "btn-outline-brand"}`}
-              onClick={() => setFilterStatus("ACTIVE")}
-            >
-              啟用中
-            </button>
-            <button
-              type="button"
-              className={`btn btn-sm ${filterStatus === "INACTIVE" ? "btn-brand" : "btn-outline-brand"}`}
-              onClick={() => setFilterStatus("INACTIVE")}
-            >
-              已停用
-            </button>
-            <button
-              type="button"
-              className={`btn btn-sm ${filterStatus === "ALL" ? "btn-brand" : "btn-outline-brand"}`}
-              onClick={() => setFilterStatus("ALL")}
-            >
-              全部
-            </button>
-          </div>
+          <StatusFilter filterStatus={filterStatus} setFilterStatus={setFilterStatus} />
           <GlobalFilter globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
         </div>
 

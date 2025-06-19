@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../config";
+import { showAlert, showConfirm } from "../utils/alert";
 
 function MemberLoginPage() {
   const [loginForm, setLoginForm] = useState({ phoneNumber: "", password: "" });
@@ -13,7 +15,7 @@ function MemberLoginPage() {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8081/member/login", {
+      const res = await fetch(`${API_BASE}/member/login`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -22,13 +24,13 @@ function MemberLoginPage() {
 
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
-        alert("登入成功！");
+        showAlert({ title: "登入成功！", icon: "success" });
         navigate("/member");
       } else {
-        alert("登入失敗：" + resData.message);
+        showAlert({ title: "登入失敗", text: resData.message || "", icon: "error" });
       }
     } catch (err) {
-      alert("登入錯誤：" + err.message);
+      showAlert({ title: "登入錯誤", text: err.message, icon: "error" });
     }
   };
 

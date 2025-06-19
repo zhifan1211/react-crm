@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./components/MemberNavbar";
+import MemberChangePasswordModal from "./components/MemberChangePasswordModal";
+import EmailVerificationModal from "./components/EmailVerificationModal";
+import { API_BASE } from "../config";
+import { showAlert, showConfirm } from "../utils/alert";
 
 function MemberEditPage() {
   const [form, setForm] = useState({
@@ -16,31 +20,33 @@ function MemberEditPage() {
     birthDate: "",
     confirmEmail: false,
   });
-  const [originalEmail, setOriginalEmail] = useState(""); // 新增
-  const [verificationCode, setVerificationCode] = useState("");
+  const [originalEmail, setOriginalEmail] = useState("");
+  const [showPwdModal, setShowPwdModal] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
   const navigate = useNavigate();
 
-  // 進入頁面時抓取會員原始資料
+  // 載入會員原始資料
   useEffect(() => {
-    fetch("http://localhost:8081/member/me", {
+    fetch(`${API_BASE}/member/me`, {
       credentials: "include",
     })
       .then((res) => res.json())
       .then((resData) => {
         if (resData.status === 200) {
           setForm(resData.data);
-          setOriginalEmail(resData.data.email); // 新增
+          setOriginalEmail(resData.data.email);
         } else {
-          alert("無法取得會員資料");
+          showAlert({ title: "無法取得會員資料", icon: "error" });
         }
       })
-      .catch((err) => alert("發生錯誤：" + err.message));
+      .catch((err) => showAlert({ title: "發生錯誤", text: err.message, icon: "error" }));
   }, []);
 
+  // input 控制
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => {
-      // email 有變動時自動將 confirmEmail 設為 false
+      // Email 變動時將驗證狀態歸零
       if (name === "email" && value !== originalEmail) {
         return { ...prev, [name]: value, confirmEmail: false };
       }
@@ -48,32 +54,37 @@ function MemberEditPage() {
     });
   };
 
+  // 完成驗證 callback（給驗證碼 Modal 用）
+  const handleVerified = () => {
+    setForm(prev => ({ ...prev, confirmEmail: true }));
+    setOriginalEmail(form.email); // 驗證成功後更新 email 基準
+  };
+
+  // 送出修改
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 若 email 被更改，強制要求驗證
+    // Email 更動未驗證禁止送出
     if (form.email !== originalEmail) {
-      alert("請先完成新 Email 的驗證！");
+      showAlert({ title: "請先完成新 Email 的驗證！", icon: "warning" });
       return;
     }
-
-    // 其餘欄位檢查
+    // 必填欄位檢查
     const requiredFields = ["lastName", "firstName", "phoneNumber", "email", "region"];
     for (let field of requiredFields) {
       if (!form[field]) {
-        alert(`請填寫欄位：${field}`);
+        showAlert({ title: `請填寫欄位：${field}`, icon: "warning" });
         return;
       }
     }
-
-    // 只有通過驗證才能送出
+    // 必須驗證
     if (!form.confirmEmail) {
-      alert("請先完成 Email 驗證！");
+      showAlert({ title: "請先完成 Email 驗證！", icon: "warning" });
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:8081/member/edit", {
+      const res = await fetch(`${API_BASE}/member/edit`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -82,127 +93,138 @@ function MemberEditPage() {
       const resData = await res.json();
 
       if (res.ok && resData.status === 200) {
-        alert("修改成功！");
+        showAlert({ title: "修改成功！", icon: "success" });
         navigate("/member");
       } else {
-        alert("修改失敗：" + resData.message);
+        showAlert({ title: "修改失敗", text: resData.message || "", icon: "error" });
       }
     } catch (err) {
-      alert("錯誤：" + err.message);
+      showAlert({ title: "錯誤", text: err.message, icon: "error" });
     }
   };
 
+  // 寄送驗證碼（打開 modal）
   const sendVerificationCode = async () => {
-    try {
-      const res = await fetch("http://localhost:8081/member/edit/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: form.email }),
-      });
-      const resData = await res.json();
-      if (res.ok && resData.status === 200) {
-        alert("驗證碼已寄出，請於 10 分鐘內完成驗證。");
-      } else {
-        alert("寄送失敗：" + (resData.message || "未知錯誤"));
-      }
-    } catch (err) {
-      alert("錯誤：" + err.message);
+    if (!form.email) {
+      showAlert({ title: "請輸入 email", icon: "warning" });
+      return;
     }
+    setShowVerifyModal(true);
   };
 
-  const verifyCode = async () => {
-    try {
-      const res = await fetch("http://localhost:8081/member/edit/check-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: form.email, code: verificationCode }),
-      });
-      const resData = await res.json();
-      if (res.ok && resData.status === 200) {
-        alert("驗證成功！");
-        setForm(prev => ({ ...prev, confirmEmail: true })); // 驗證成功即設定
-        setOriginalEmail(form.email); // 驗證成功就更新基準值
-      } else {
-        alert("驗證失敗：" + resData.message);
-      }
-    } catch (err) {
-      alert("錯誤：" + err.message);
-    }
-  };
+  // 驗證狀態
+  const verificationStatus = form.email !== originalEmail
+    ? { text: "需重新驗證", color: "#736029" }
+    : form.confirmEmail
+      ? { text: "已驗證", color: "#3D6E73" }
+      : { text: "尚未驗證", color: "#90484C" };
 
-  // 驗證狀態顯示判斷
-  let verificationStatus = "❌ 尚未驗證";
-  if (form.email !== originalEmail) {
-    verificationStatus = "⚠️需重新驗證";
-  } else if (form.confirmEmail) {
-    verificationStatus = "✅ 已驗證";
-  }
-
+  // 版面設計：置中卡片
   return (
     <div>
       <Navbar />
-        <div>
-        <h2>編輯會員資料</h2>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>姓：</label>
-            <input name="lastName" value={form.lastName} onChange={handleChange} required />
-          </div>
-          <div>
-            <label>名：</label>
-            <input name="firstName" value={form.firstName} onChange={handleChange} required />
-          </div>
-          <div>
-            <label>性別：</label>
-            <input value={form.gender === "MALE" ? "男" : "女"} disabled />
-          </div>
-          <div>
-            <label>生日：</label>
-            <input value={form.birthDate} disabled />
-          </div>
-          <div>
-            <label>電話：</label>
-            <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} required />
-          </div>
-          <div>
-            <label>居住地：</label>
-            <input name="region" value={form.region || ""} onChange={handleChange} />
-          </div>
-          <div>
-            <label>Email：</label>
-            <input name="email" value={form.email || ""} onChange={handleChange} />
-          </div>
-          <div>
-            <button type="button" onClick={sendVerificationCode}>
-              寄送驗證碼
-            </button>
-          </div>
-          <div>
-            <label>驗證碼：</label>
-            <input
-              type="text"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-            />
-            <button type="button" onClick={verifyCode}>
-              確認驗證
-            </button>
-          </div>
-          <div>目前驗證狀態：{verificationStatus}</div>
-          <button type="submit" style={{ marginTop: "10px" }}>
-            儲存變更
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/member/edit/change-password")}
-            style={{ marginTop: "10px" }}
-          >
-            更改密碼
-          </button>
-        </form>
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "90vh" }}>
+        <div className="shadow mt-5 mb-5 p-4 bg-white rounded" style={{ minWidth: 350, maxWidth: 430, width: "100%" }}>
+          <h4 className="mb-4 text-center brand-title">會員資料修改</h4>
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label className="form-label">姓氏</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  className="form-control"
+                  value={form.lastName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="col-md-6 mb-3">
+                <label className="form-label">名字</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  className="form-control"
+                  value={form.firstName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label">性別</label>
+              <input value={form.gender === "MALE" ? "男" : "女"} disabled className="form-control" />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">生日</label>
+              <input value={form.birthDate} disabled className="form-control" />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">電話</label>
+              <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} required className="form-control" />
+            </div>
+            <div className="mb-3">
+              <label className="form-label">居住地</label>
+              <input name="region" value={form.region || ""} onChange={handleChange} className="form-control" />
+            </div>
+            <div className="row mb-2 align-items-center">
+              <div className="col-8">
+                <label className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  name="email"
+                  value={form.email || ""}
+                  onChange={handleChange}
+                  required
+                />
+                <div className="mt-1">
+                  <span className="form-text" style={{fontSize: 13 }}>
+                    驗證狀態：
+                  </span>
+                  <span className="form-text" style={{ color: verificationStatus.color, fontWeight: "bold", fontSize: 13 }}>
+                    {verificationStatus.text}
+                  </span>
+                </div>
+              </div>
+              <div className="col-4 d-flex align-items-end">
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={sendVerificationCode}
+                  disabled={form.email === originalEmail && form.confirmEmail}
+                >
+                  寄送驗證碼
+                </button>
+              </div>
+            </div>
+            <div className="d-grid gap-3 mt-4 mb-2">
+              <button
+                type="button"
+                className="btn btn-outline-brand"
+                onClick={() => setShowPwdModal(true)}
+              >
+                變更密碼
+              </button>
+              <button type="submit" className="btn btn-brand">
+                儲存變更
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
+      {/* 密碼修改 Modal */}
+      <MemberChangePasswordModal
+        show={showPwdModal}
+        onClose={() => setShowPwdModal(false)}
+      />
+      {/* Email驗證碼 Modal */}
+      <EmailVerificationModal
+        show={showVerifyModal}
+        onClose={() => setShowVerifyModal(false)}
+        email={form.email}
+        onVerified={handleVerified}
+      />
     </div>
   );
 }

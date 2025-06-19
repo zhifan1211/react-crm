@@ -4,6 +4,8 @@ import Navbar from "./components/AdminNavbar";
 import DateRangeFilter from "./components/DateRangeFilter";
 import GlobalFilter from "./components/GlobalFilter";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { API_BASE } from "../config";
+import { showAlert, showConfirm } from "../utils/alert";
 
 function AdminPointManagePage() {
   const { memberId } = useParams();
@@ -24,23 +26,23 @@ function AdminPointManagePage() {
   // 取得會員資訊
   const fetchMember = async () => {
     try {
-      const res = await fetch(`http://localhost:8081/admin/member/${memberId}`, { credentials: "include" });
+      const res = await fetch(`${API_BASE}/admin/member/${memberId}`, { credentials: "include" });
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
         setMemberName(resData.data.lastName + resData.data.firstName);
         setMemberLevel(resData.data.level);
       } else {
-        alert("載入會員資訊失敗：" + (resData.message ?? "未知錯誤"));
+        showAlert({ title: "載入會員資訊失敗", text: resData.message ?? "未知錯誤", icon: "error" });
       }
     } catch (err) {
-      alert("會員資訊錯誤：" + err.message);
+      showAlert({ title: "會員資訊錯誤", text: err.message, icon: "error" });
     }
   };
 
   // 取得點數紀錄
   const fetchLogs = async () => {
     try {
-      const res = await fetch(`http://localhost:8081/admin/member/${memberId}/point`, { credentials: "include" });
+      const res = await fetch(`${API_BASE}/admin/member/${memberId}/point`, { credentials: "include" });
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
         const logs = resData.data;
@@ -49,17 +51,17 @@ function AdminPointManagePage() {
           .reduce((sum, log) => sum + log.remainPoints, 0);
         setTotalRemainPoints(total);
       } else {
-        alert("載入歷程失敗：" + (resData.message ?? "未知錯誤"));
+        showAlert({ title: "載入歷程失敗", text: resData.message ?? "未知錯誤", icon: "error" });
       }
     } catch (err) {
-      alert("歷程錯誤：" + err.message);
+      showAlert({ title: "歷程錯誤", text: err.message, icon: "error" });
     }
   };
 
   // 取得點數類型
   const fetchPointTypes = async () => {
     try {
-      const res = await fetch(`http://localhost:8081/admin/point-types?active=true&category=${category}`, {
+      const res = await fetch(`${API_BASE}/admin/point-types?active=true&category=${category}`, {
         credentials: "include",
       });
       const resData = await res.json();
@@ -67,10 +69,11 @@ function AdminPointManagePage() {
         setPointTypes(resData.data);
         setForm({ typeId: "", points: "", note: "" });
       } else {
-        alert("載入點數類型失敗：" + (resData.message ?? "未知錯誤"));
+        showAlert({ title: "載入點數類型失敗", text: resData.message ?? "未知錯誤", icon: "error" 
+        });
       }
     } catch (err) {
-      alert("載入點數類型錯誤：" + err.message);
+      showAlert({ title: "載入點數類型錯誤", text: err.message, icon: "error" });
     }
   };
 
@@ -95,19 +98,32 @@ function AdminPointManagePage() {
     e.preventDefault();
     const pointValue = parseInt(form.points, 10);
     if (!Number.isInteger(pointValue) || pointValue <= 0) {
-      alert("點數必須為正整數");
+      showAlert({ title: "點數必須為正整數", icon: "warning" });
       return;
     }
+    
     if (category === "CONSUME" && memberLevel === "PASSER") {
-      const confirmMsg = "此會員尚未驗證為正式會員，確定要執行扣點嗎？\n建議請客戶完成認證後再執行，如屬回扣或特殊情況請再三確認。";
-      if (!window.confirm(confirmMsg)) return;
+      const result = await showConfirm({
+        title: "此會員尚未驗證為正式會員，確定要執行扣點嗎？",
+        text: "建議請客戶完成認證後再執行，如屬回扣或特殊情況請再三確認。",
+        icon: "warning",
+        confirmButtonText: "確定",
+        cancelButtonText: "取消",
+      });
+      if (!result.isConfirmed) return;
     } else {
-      const normalMsg = `請確認本次操作資訊無誤：\n操作類別：${category === "ADD" ? "派發" : "消耗"}\n點數：${form.points}\n確定要執行嗎？`;
-      if (!window.confirm(normalMsg)) return;
+      const result = await showConfirm({
+        title: "請確認本次操作資訊無誤",
+        html: `操作類別：${category === "ADD" ? "派發" : "消耗"}<br/>點數：${form.points}<br/>確定要執行嗎？`,
+        icon: "question",
+        confirmButtonText: "確定",
+        cancelButtonText: "取消",
+      });
+      if (!result.isConfirmed) return;
     }
     const payload = { ...form, points: pointValue, memberId };
     try {
-      const res = await fetch(`http://localhost:8081/admin/member/${memberId}/point`, {
+      const res = await fetch(`${API_BASE}/admin/member/${memberId}/point`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -115,15 +131,15 @@ function AdminPointManagePage() {
       });
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
-        alert("操作成功！");
+        showAlert({ title: "操作成功！", icon: "success" });
         setForm({ typeId: "", points: "", note: "" });
         setCategory("ADD");
         fetchLogs();
       } else {
-        alert("操作失敗：" + (resData.message ?? "未知錯誤"));
+        showAlert({ title: "操作失敗", text: resData.message ?? "未知錯誤", icon: "error" });
       }
     } catch (err) {
-      alert("提交錯誤：" + err.message);
+      showAlert({ title: "提交錯誤", text: err.message, icon: "error" });
     }
   };
 

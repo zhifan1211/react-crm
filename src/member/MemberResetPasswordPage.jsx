@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../config";
+import { showAlert, showConfirm } from "../utils/alert";
 
 function MemberResetPasswordPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -26,11 +28,11 @@ function MemberResetPasswordPage() {
     if (countdown > 0) return; // 倒數期間禁止再次點擊
 
     if (!phoneNumber) {
-      alert("請輸入手機號碼！");
+      showAlert({ title: "請輸入手機號碼！", icon: "warning" });
       return;
     }
     try {
-      const res = await fetch("http://localhost:8081/member/reset-password/send-email", {
+      const res = await fetch(`${API_BASE}/member/reset-password/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phoneNumber }),
@@ -38,40 +40,40 @@ function MemberResetPasswordPage() {
 
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
-        alert("驗證碼已寄出，請查收信箱");
+        showAlert({ title: "驗證碼已寄出，請查收信箱", icon: "success" });
         setStep(2);
         setCountdown(60); // 啟動倒數 60 秒
       } else {
-        alert("寄送失敗：" + (resData.message || "未知錯誤"));
+        showAlert({ title: "寄送失敗", text: resData.message || "未知錯誤", icon: "error" });
       }
     } catch (err) {
-      alert("錯誤：" + err.message);
+      showAlert({ title: "錯誤", text: err.message, icon: "error" });
     }
   };
 
   // 驗證驗證碼
   const handleVerifyCode = async () => {
     if (!code) {
-      alert("請輸入驗證碼！");
+      showAlert({ title: "請輸入驗證碼！", icon: "warning" });
       return;
     }
     try {
-      const res = await fetch("http://localhost:8081/member/reset-password/check-email", {
+      const res = await fetch(`${API_BASE}/member/reset-password/check-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phoneNumber, code }), // email 不用再前端送出
       });
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
-        alert("驗證成功，請設定新密碼！");
+        showAlert({ title: "驗證成功，請設定新密碼！", icon: "success" });
         setResetToken(resData.data); 
         setVerified(true);
         setStep(3);
       } else {
-        alert("驗證失敗：" + (resData.message || "未知錯誤"));
+        showAlert({ title: "驗證失敗", text: resData.message || "未知錯誤", icon: "error" });
       }
     } catch (err) {
-      alert("錯誤：" + err.message);
+      showAlert({ title: "錯誤", text: err.message, icon: "error" });
     }
   };
 
@@ -79,32 +81,32 @@ function MemberResetPasswordPage() {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (!verified) {
-      alert("請先完成驗證！");
+      showAlert({ title: "請先完成驗證！", icon: "warning" });
       return;
     }
     if (!newPassword || !confirmNewPassword) {
-      alert("請填寫所有欄位！");
+      showAlert({ title: "請填寫所有欄位！", icon: "warning" });
       return;
     }
     if (newPassword !== confirmNewPassword) {
-      alert("新密碼與再次輸入不一致！");
+      showAlert({ title: "新密碼與再次輸入不一致！", icon: "warning" });
       return;
     }
     try {
-      const res = await fetch("http://localhost:8081/member/reset-password", {
+      const res = await fetch(`${API_BASE}/member/reset-password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phoneNumber, newPassword, token: resetToken }),
       });
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
-        alert("密碼重設成功，請重新登入！");
+        showAlert({ title: "密碼重設成功，請重新登入！", icon: "success" });
         navigate("/member/login");
       } else {
-        alert("密碼重設失敗：" + (resData.message || "未知錯誤"));
+        showAlert({ title: "密碼重設失敗", text: resData.message || "未知錯誤", icon: "error" });
       }
     } catch (err) {
-      alert("錯誤：" + err.message);
+      showAlert({ title: "錯誤", text: err.message, icon: "error" });
     }
   };
 

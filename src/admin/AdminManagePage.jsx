@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import Navbar from "./components/AdminNavbar";
+import { API_BASE } from "../config";
 import {
   useTable,
   useSortBy,
@@ -8,6 +9,7 @@ import {
 } from "react-table";
 import "bootstrap/dist/css/bootstrap.min.css";
 import GlobalFilter from "./components/GlobalFilter";
+import { showAlert, showConfirm } from "../utils/alert";
 
 function AdminManagePage() {
   const [admins, setAdmins] = useState([]);
@@ -27,7 +29,7 @@ function AdminManagePage() {
   const isSuperAdmin = editId === "AD00001";
 
   const fetchAdmins = async () => {
-    const res = await fetch("http://localhost:8081/admin/manage-admins", {
+    const res = await fetch(`${API_BASE}/admin/manage-admins`, {
       credentials: "include",
     });
     const data = await res.json();
@@ -38,7 +40,7 @@ function AdminManagePage() {
     fetchAdmins();
 
     // 抓部門 enum
-    fetch("http://localhost:8081/admin/manage-admins/units", {
+    fetch(`${API_BASE}/admin/manage-admins/units`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -61,8 +63,8 @@ function AdminManagePage() {
     const submitForm = { ...form };
     try {
       const url = editMode
-        ? `http://localhost:8081/admin/manage-admins/${editId}`
-        : "http://localhost:8081/admin/manage-admins";
+        ? `${API_BASE}/admin/manage-admins/${editId}`
+        : `${API_BASE}/admin/manage-admins`;
       const method = editMode ? "PUT" : "POST";
       const res = await fetch(url, {
         method,
@@ -72,22 +74,22 @@ function AdminManagePage() {
       });
       const data = await res.json();
       if (res.ok && data.status === 200) {
-        alert(editMode ? "修改成功！" : "新增成功！");
+        showAlert({ title: editMode ? "修改成功！" : "新增成功！", icon: "success" });
         setForm({ username: "", adminName: "", unit: "資訊部", active: true });
         setEditMode(false);
         setEditId(null);
         fetchAdmins();
       } else {
-        alert((editMode ? "修改失敗：" : "新增失敗：") + data.message);
+        showAlert({ title: editMode ? "修改失敗" : "新增失敗", text: data.message || "", icon: "error" });
       }
     } catch (err) {
-      alert("請求錯誤：" + err.message);
+      showAlert({ title: "請求錯誤", text: err.message, icon: "error" });
     }
   };
 
   const handleEdit = (admin) => {
     if (admin.adminId === "AD00001") {
-      alert("總管理員無法被修改");
+      showAlert({ title: "總管理員無法被修改", icon: "warning" });
       return;
     }
     setForm({
@@ -181,7 +183,7 @@ function AdminManagePage() {
     <div>
       <Navbar />
       <div className="container py-4">
-        <h5 className="mb-3">管理者管理</h5>
+        <h5 className="mb-3">後台管理列表</h5>
         {/* 表單 */}
         <form onSubmit={handleSubmit} className="mb-4">
           <fieldset className="border rounded p-3">

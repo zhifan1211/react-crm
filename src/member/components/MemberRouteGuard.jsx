@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../../config";
 
 // 這是一個高階元件：包住所有需要登入的 member 頁面
 function MemberRouteGuard({ children }) {
@@ -10,7 +11,7 @@ function MemberRouteGuard({ children }) {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const res = await fetch("http://localhost:8081/member/check-login", {
+        const res = await fetch(`${API_BASE}/member/check-login`, {
           credentials: "include",
         });
         const data = await res.json();

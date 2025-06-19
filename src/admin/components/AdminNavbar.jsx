@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AdminChangePasswordModal from "./AdminChangePasswordModal";
+import { API_BASE } from "../../config";
+import { showAlert, showConfirm } from "../../utils/alert";
 
 function AdminNavbar() {
   const navigate = useNavigate();
@@ -11,25 +13,25 @@ function AdminNavbar() {
   // 處理登出按鈕點擊事件
   const handleLogout = async () => {
     try {
-      const res = await fetch("http://localhost:8081/admin/logout", {
+      const res = await fetch(`${API_BASE}/admin/logout`, {
         method: "GET",
         credentials: "include",
       });
 
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
-        alert("登出成功");
+        showAlert({ title: "登出成功", icon: "success" });
         navigate("/admin/login");
       } else {
-        alert("登出失敗：" + resData.message);
+        showAlert({ title: "登出失敗", text: resData.message || "", icon: "error" });
       }
     } catch (err) {
-      alert("登出錯誤：" + err.message);
+      showAlert({ title: "登出錯誤", text: err.message, icon: "error" });
     }
   };
 
   useEffect(() => {
-    fetch("http://localhost:8081/admin/me", {
+    fetch(`${API_BASE}/admin/me`, {
       method: "GET",
       credentials: "include",
     })
@@ -62,13 +64,16 @@ function AdminNavbar() {
         {/* 中間導覽列 */}
         <div className="d-flex flex-grow-1 justify-content-center">
           <Link className="nav-link text-brand mx-3" to="/admin/member">
-            會員列表
+            會員管理列表
           </Link>
           <Link className="nav-link text-brand mx-3" to="/admin/point-types">
-            點數類型列表
+            點數類型管理列表
           </Link>
           <Link className="nav-link text-brand mx-3" to="/admin/point-list">
             點數紀錄列表
+          </Link>
+          <Link className="nav-link text-brand mx-3" to="/admin/item-list">
+            兌換品管理列表
           </Link>
         </div>
 
@@ -80,7 +85,7 @@ function AdminNavbar() {
               className="btn btn-light me-3"
               onClick={() => navigate("/admin/manage-admins")}
             >
-              管理後台
+              後台管理
             </button>
           )}
           <button

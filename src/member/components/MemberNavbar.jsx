@@ -1,5 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { API_BASE } from "../../config";
+import { showAlert, showConfirm } from "../../utils/alert";
 
 function MemberNavbar() {
   const navigate = useNavigate();
@@ -7,25 +9,25 @@ function MemberNavbar() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("http://localhost:8081/member/logout", {
+      const res = await fetch(`${API_BASE}/member/logout`, {
         method: "GET",
         credentials: "include",
       });
 
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
-        alert("登出成功");
+        showAlert({ title: "登出成功", icon: "success" });
         navigate("/member/login");
       } else {
-        alert("登出失敗：" + resData.message);
+        showAlert({ title: "登出失敗", text: resData.message || "", icon: "error" });
       }
     } catch (err) {
-      alert("登出錯誤：" + err.message);
+      showAlert({ title: "登出錯誤", text: err.message, icon: "error" });
     }
   };
 
   useEffect(() => {
-    fetch("http://localhost:8081/member/me", {
+    fetch(`${API_BASE}/member/me`, {
       method: "GET",
       credentials: "include",
     })
@@ -52,10 +54,10 @@ function MemberNavbar() {
             會員卡
           </Link>
           <Link className="nav-link text-brand mx-3" to="/member/point">
-            點數紀錄
+            點數明細
           </Link>
-          <Link className="nav-link text-brand mx-3" to="/member/rewards">
-            兌換專區
+          <Link className="nav-link text-brand mx-3" to="/member/item-list">
+            兌換品一覽
           </Link>
         </div>
 
