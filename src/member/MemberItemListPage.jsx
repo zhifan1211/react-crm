@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import Navbar from "./components/MemberNavbar";
+import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../config";
 import { showAlert, showConfirm } from "../utils/alert";
 
 function MemberItemListPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [memberInfo, setMemberInfo] = useState(null);
 
   // 取得啟用中商品
   const fetchItems = async () => {
@@ -38,11 +41,36 @@ function MemberItemListPage() {
     return `${API_BASE}/images/${url}`;
   };
 
+  useEffect(() => {
+    const fetchMemberInfo = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/member/info`, { credentials: "include" });
+        const data = await res.json();
+        if (res.ok && data.status === 200) {
+          setMemberInfo(data.data);
+        }
+      } catch (err) {
+        // 可以略過錯誤提示，讓會員照常看商品
+      }
+    };
+    fetchMemberInfo();
+  }, []);
+
   return (
     <div>
       <Navbar/>
       <div className="container py-4">
         <h5 className="mb-3">兌換品一覽</h5>
+        {memberInfo && memberInfo.level === "PASSER" && (
+          <div className="alert alert-warning d-flex align-items-center mb-4" style={{ borderRadius: "10px" }}>
+            <button className="btn btn-warn-solid me-4" onClick={() => navigate("/member/edit")}>
+              立即填寫
+            </button>
+            <div>
+              <strong>您目前尚未成為正式會員</strong><br />填完會員資料後，即可至門市使用點數兌換
+            </div>
+          </div>
+        )}
         {loading ? (
           <p>載入中...</p>
         ) : (

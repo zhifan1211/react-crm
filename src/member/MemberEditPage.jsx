@@ -60,6 +60,15 @@ function MemberEditPage() {
     setOriginalEmail(form.email); // 驗證成功後更新 email 基準
   };
 
+  // 定義欄位名稱（報錯顯示用）
+  const fieldLabels = {
+    lastName: "姓氏",
+    firstName: "名字",
+    phoneNumber: "手機號碼",
+    email: "Email",
+    region: "居住地"
+  };
+
   // 送出修改
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,7 +82,7 @@ function MemberEditPage() {
     const requiredFields = ["lastName", "firstName", "phoneNumber", "email", "region"];
     for (let field of requiredFields) {
       if (!form[field]) {
-        showAlert({ title: `請填寫欄位：${field}`, icon: "warning" });
+        showAlert({ title: `請填寫欄位：${fieldLabels[field] || field}`, icon: "warning" });
         return;
       }
     }

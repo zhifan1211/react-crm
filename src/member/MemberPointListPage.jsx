@@ -12,8 +12,7 @@ import { showAlert, showConfirm } from "../utils/alert";
 function MemberPointListPage() {
   const [points, setPoints] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [nearestExpiry, setNearestExpiry] = useState("-");
+  const [memberInfo, setMemberInfo] = useState(null);
 
   useEffect(() => {
     const fetchPoints = async () => {
@@ -26,21 +25,6 @@ function MemberPointListPage() {
 
         if (res.ok && data.status === 200) {
           setPoints(data.data);
-
-          // 有效點數總計
-          const totalPoints = data.data
-            .filter((p) => p.category === "ADD")
-            .reduce((sum, p) => sum + (p.remainPoints || 0), 0);
-          setTotal(totalPoints);
-
-          // 最近到期日
-          const expiryDates = data.data
-            .filter((p) => p.expiredAt)
-            .map((p) => new Date(p.expiredAt))
-            .sort((a, b) => a - b);
-          if (expiryDates.length > 0) {
-            setNearestExpiry(expiryDates[0].toLocaleDateString());
-          }
         } else {
           showAlert({ title: "取得點數資料失敗", text: data.message || "", icon: "error" });
         }
@@ -51,6 +35,24 @@ function MemberPointListPage() {
     };
 
     fetchPoints();
+  }, []);
+
+  useEffect(() => {
+    const fetchMemberInfo = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/member/info`, { credentials: "include" });
+        const data = await res.json();
+        if (res.ok && data.status === 200) {
+          setMemberInfo(data.data);
+        } else {
+          showAlert({ title: "取得會員資料失敗", text: data.message || "", icon: "error" });
+        }
+      } catch (err) {
+        showAlert({ title: "伺服器錯誤", icon: "error" });
+      }
+    };
+
+    fetchMemberInfo();
   }, []);
 
   // react-table 欄位
@@ -124,24 +126,22 @@ function MemberPointListPage() {
           {/* 有效點數總計 */}
           <div className="col-md-6 mb-2">
             <div className="border rounded p-3 bg-white shadow-sm h-100">
-              <div className="fs-7 text-secondary mb-1" style={{ fontSize: "13px" }}>有效點數總計</div>
-              <div
-                className="text-center fw-bold"
-                style={{ fontSize: "2rem", color: "#1F5673"}}
-              >
-                {total}
+              <div className="fs-7 text-secondary mb-1" style={{ fontSize: "13px" }}>
+                有效點數總計
+              </div>
+              <div className="text-center fw-bold" style={{ fontSize: "2rem", color: "#1F5673"}}>
+                {memberInfo ? memberInfo.totalPoints : "-"}
               </div>
             </div>
           </div>
           {/* 點數即將到期日 */}
           <div className="col-md-6 mb-2">
             <div className="border rounded p-3 bg-white shadow-sm h-100">
-              <div className="fs-7 text-secondary mb-1" style={{ fontSize: "13px" }}>點數即將到期日</div>
-              <div
-                className="text-center fw-bold"
-                style={{ fontSize: "2rem", color: "#90484C"}}
-              >
-                {nearestExpiry}
+              <div className="fs-7 text-secondary mb-1" style={{ fontSize: "13px" }}>
+                點數即將到期日
+              </div>
+              <div className="text-center fw-bold" style={{ fontSize: "2rem", color: "#90484C"}}>
+                {memberInfo ? (memberInfo.nearestExpiryDate || "-") : "-"}
               </div>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { showAlert, showConfirm } from "../../utils/alert";
 
 function MemberNavbar() {
   const navigate = useNavigate();
-  const [memberName, setMemberName] = useState("");
+  const [memberInfo, setMemberInfo] = useState(null);
 
   const handleLogout = async () => {
     try {
@@ -27,14 +27,14 @@ function MemberNavbar() {
   };
 
   useEffect(() => {
-    fetch(`${API_BASE}/member/me`, {
+    fetch(`${API_BASE}/member/info`, {
       method: "GET",
       credentials: "include",
     })
       .then((res) => res.json())
       .then((resData) => {
         if (resData.status === 200) {
-          setMemberName(resData.data.firstName);
+          setMemberInfo(resData.data);
         }
       })
       .catch((err) => console.error("會員資訊讀取失敗", err));
@@ -47,7 +47,6 @@ function MemberNavbar() {
         <Link className="brand-title text-brand ms-5 fs-4" to="/member">
           OTTER POINT
         </Link>
-
         {/* 中間導覽列 */}
         <div className="d-flex flex-grow-1 justify-content-center">
           <Link className="nav-link text-brand mx-3" to="/member/">
@@ -60,14 +59,12 @@ function MemberNavbar() {
             兌換品一覽
           </Link>
         </div>
-
-        {/* 右側登出與修改按鈕 */}
+        {/* 右側資訊、修改與登出按鈕 */}
         <div className="d-flex align-items-center me-5">
-          <span className="me-3 text-muted">{memberName} 你好！</span>
-          <button
-            className="btn btn-light me-3"
-            onClick={() => navigate("/member/edit")}
-          >
+          <span className="me-3 text-muted">
+            {memberInfo ? `${memberInfo.firstName} 你好！目前剩餘點數：${memberInfo.totalPoints ?? 0}` : ""}
+          </span>
+          <button className="btn btn-light me-3" onClick={() => navigate("/member/edit")}>
             修改資料
           </button>
           <button className="btn btn-light" onClick={handleLogout}>

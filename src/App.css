@@ -43,6 +43,22 @@
   color: #fff !important;
   border: none !important;
 }
+.btn-warn-solid {
+  background-color: #736029 !important;
+  color: #fff !important;
+  border: none !important;
+}
+.btn-warn-solid:hover {
+  background-color: #5a4a1b !important;
+  color: #fff !important;
+  border: none !important;
+}
+.btn-upgrade{
+  background-color: #fff !important;
+  color: #505050 !important;
+  border: none !important;
+}
+  
 
 /* 品牌文字樣式 */
 .brand-title {
