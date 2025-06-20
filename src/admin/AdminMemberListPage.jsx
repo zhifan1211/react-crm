@@ -99,7 +99,7 @@ function AdminMemberList() {
       {
         Header: "等級", accessor: "level",
         Cell: ({ value }) =>
-          value === "PASSER" ? "非正式" :
+          value === "PASSER" ? "訪客" :
           value === "FORMAL" ? "正式" : "-"
       },
       {

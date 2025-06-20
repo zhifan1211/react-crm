@@ -63,6 +63,9 @@ function AdminNavbar() {
 
         {/* 中間導覽列 */}
         <div className="d-flex flex-grow-1 justify-content-center">
+          <Link className="nav-link text-brand mx-3" to="/admin">
+            總覽
+          </Link>
           <Link className="nav-link text-brand mx-3" to="/admin/member">
             會員管理列表
           </Link>

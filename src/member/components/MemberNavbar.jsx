@@ -17,7 +17,7 @@ function MemberNavbar() {
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
         showAlert({ title: "登出成功", icon: "success" });
-        navigate("/member/login");
+        navigate("/");
       } else {
         showAlert({ title: "登出失敗", text: resData.message || "", icon: "error" });
       }
@@ -49,7 +49,7 @@ function MemberNavbar() {
         </Link>
         {/* 中間導覽列 */}
         <div className="d-flex flex-grow-1 justify-content-center">
-          <Link className="nav-link text-brand mx-3" to="/member/">
+          <Link className="nav-link text-brand mx-3" to="/member">
             會員卡
           </Link>
           <Link className="nav-link text-brand mx-3" to="/member/point">

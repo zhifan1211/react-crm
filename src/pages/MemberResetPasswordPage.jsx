@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../config";
 import { showAlert, showConfirm } from "../utils/alert";
+import HomeNavbar from "./components/HomeNavbar";
 
 function MemberResetPasswordPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -101,7 +102,7 @@ function MemberResetPasswordPage() {
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
         showAlert({ title: "密碼重設成功，請重新登入！", icon: "success" });
-        navigate("/member/login");
+        navigate("/");
       } else {
         showAlert({ title: "密碼重設失敗", text: resData.message || "未知錯誤", icon: "error" });
       }
@@ -111,112 +112,110 @@ function MemberResetPasswordPage() {
   };
 
   return (
-    <div className="login-page d-flex align-items-center justify-content-center">
-      <div className="login-card shadow p-4 rounded bg-white">
-        <h2 className="mb-4 text-center brand-title">OTTER POINT</h2>
-        <h5 className="mb-4 text-center">忘記密碼</h5>
+    <>
+      <HomeNavbar />
+      <div className="login-page d-flex align-items-center justify-content-center">
+        <div className="login-card shadow p-4 rounded bg-white">
+          <h2 className="mb-4 text-center brand-title">OTTER POINT</h2>
+          <h5 className="mb-4 text-center">忘記密碼</h5>
 
-        {/* 步驟 1：輸入電話號碼 */}
-        {step === 1 && (
-          <>
-            <div className="form-text text-muted text-center mb-3">
-              此功能僅限正式會員（已驗證信箱）使用
-            </div>
-            <div className="mb-3">
-              <label className="form-label">手機號碼</label>
-              <input
-                type="text"
-                className="form-control"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                required
-              />
-              <div className="form-text text-muted">
-                請輸入註冊時使用的手機號碼，例如：0911222333
+          {/* 步驟 1：輸入電話號碼 */}
+          {step === 1 && (
+            <>
+              <div className="form-text text-muted text-center mb-3">
+                此功能僅限正式會員（已驗證信箱）使用
               </div>
-            </div>
-            <button
-              type="button"
-              className="btn btn w-100"
-              onClick={handleSendCode}
-              disabled={!phoneNumber}
-            >
-              寄送郵件驗證碼
-            </button>
-          </>
-        )}
-
-        {/* 步驟 2：輸入驗證碼 */}
-        {step === 2 && (
-          <>
-            <div className="mb-3">
-              <label className="form-label">驗證碼</label>
-              <input
-                type="text"
-                className="form-control"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                required
-              />
-              <div className="form-text text-muted">
-               請至電郵信箱查看驗證碼
+              <div className="mb-3">
+                <label className="form-label">手機號碼</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
+                />
+                <div className="form-text text-muted">
+                  請輸入註冊時使用的手機號碼，例如：0911222333
+                </div>
               </div>
-            </div>
-            <button
-              type="button"
-              className="btn btn w-100 mt-3"
-              onClick={handleVerifyCode}
-            >
-              驗證信箱
-            </button>
-            <div
-              className={`form-text ${countdown > 0 ? "text-secondary" : "text-brand link-like"} mt-2 text-center`}
-              onClick={countdown === 0 ? handleSendCode : null}
-              style={{ cursor: countdown === 0 ? "pointer" : "default" }}
-            >
-              {countdown > 0 ? `若未收到驗證信，請稍候 ${countdown} 秒後重試` : "重新寄送驗證碼"}
-            </div>
-          </>
-        )}
+              <button
+                type="button"
+                className="btn btn w-100"
+                onClick={handleSendCode}
+                disabled={!phoneNumber}
+              >
+                寄送郵件驗證碼
+              </button>
+            </>
+          )}
 
-        {/* 步驟 3：重設密碼 */}
-        {step === 3 && verified && (
-          <form onSubmit={handleResetPassword}>
-            <div className="mb-3">
-              <label className="form-label">新密碼</label>
-              <input
-                type="password"
-                className="form-control"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                autoComplete="new-password"
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">再次輸入新密碼</label>
-              <input
-                type="password"
-                className="form-control"
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                autoComplete="new-password"
-                required
-              />
-            </div>
-            <button type="submit" className="btn btn w-100">
-              送出
-            </button>
-          </form>
-        )}
+          {/* 步驟 2：輸入驗證碼 */}
+          {step === 2 && (
+            <>
+              <div className="mb-3">
+                <label className="form-label">驗證碼</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                />
+                <div className="form-text text-muted">
+                  請至電郵信箱查看驗證碼
+                </div>
+              </div>
+              <button
+                type="button"
+                className="btn btn w-100 mt-3"
+                onClick={handleVerifyCode}
+              >
+                驗證信箱
+              </button>
+              <div
+                className={`form-text ${countdown > 0 ? "text-secondary" : "text-brand link-like"} mt-2 text-center`}
+                onClick={countdown === 0 ? handleSendCode : null}
+                style={{ cursor: countdown === 0 ? "pointer" : "default" }}
+              >
+                {countdown > 0 ? `若未收到驗證信，請稍候 ${countdown} 秒後重試` : "重新寄送驗證碼"}
+              </div>
+            </>
+          )}
 
-        <div className="form-text text-brand link-like text-center mt-4" onClick={() => navigate("/member/login")}>
-          返回登入頁
+          {/* 步驟 3：重設密碼 */}
+          {step === 3 && verified && (
+            <form onSubmit={handleResetPassword}>
+              <div className="mb-3">
+                <label className="form-label">新密碼</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">再次輸入新密碼</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+              <button type="submit" className="btn btn w-100">
+                送出
+              </button>
+            </form>
+          )}
         </div>
       </div>
-    </div>
+    </>
   );
-
 }
 
 export default MemberResetPasswordPage;

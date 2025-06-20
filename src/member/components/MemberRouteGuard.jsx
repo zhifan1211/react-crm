@@ -18,11 +18,11 @@ function MemberRouteGuard({ children }) {
         if (res.ok && data.status === 200 && data.data === true) {
           setIsLoggedIn(true);
         } else {
-          navigate("/member/login"); // 沒登入就導去登入頁
+          navigate("/"); // 沒登入就導去登入頁
         }
       } catch (err) {
         console.error("檢查登入錯誤", err);
-        navigate("/member/login");
+        navigate("/");
       } finally {
         setChecking(false);
       }

@@ -4,7 +4,7 @@ import Navbar from "./components/MemberNavbar";
 import { API_BASE } from "../config";
 import { QRCodeSVG } from "qrcode.react";
 
-function MemberHomePage() {
+function MemberCardPage() {
   const [info, setInfo] = useState(null);
   const navigate = useNavigate();
 
@@ -88,4 +88,4 @@ function MemberHomePage() {
   );
 }
 
-export default MemberHomePage;
+export default MemberCardPage;
