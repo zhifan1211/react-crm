@@ -29,7 +29,7 @@ function AdminRouteGuard({ children }) {
     };
 
     checkLogin();
-  }, []);
+  }, [navigate]);
 
   if (checking) return <div>檢查登入中...</div>;
   return isLoggedIn ? children : null;

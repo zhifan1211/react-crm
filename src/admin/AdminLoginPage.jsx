@@ -12,25 +12,40 @@ function AdminLoginPage() {
     setLoginForm((prev) => ({ ...prev, [name]: value.trim() }));
   };
 
+  const [captcha, setCaptcha] = useState("");
+  const [captchaUrl, setCaptchaUrl] = useState(`${API_BASE}/admin/captcha`);
+
+  const refreshCaptcha = () => {
+    setCaptchaUrl(`${API_BASE}/admin/captcha?t=${Date.now()}`); // 加時間戳避免快取
+  };
+
+  const handleCaptchaChange = (e) => setCaptcha(e.target.value);
+
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     try {
+      const data = {
+        ...loginForm,
+        captcha,
+      };
       const res = await fetch(`${API_BASE}/admin/login`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(loginForm),
+        body: new URLSearchParams(data),
       });
 
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
         showAlert({ title: "登入成功", icon: "success" });
-        navigate("/admin"); // 登入成功後導向會員列表
+        navigate("/admin");
       } else {
         showAlert({ title: "登入失敗", text: resData.message || "", icon: "error" });
+        refreshCaptcha(); // 登入失敗時刷新驗證碼
       }
     } catch (err) {
       showAlert({ title: "登入錯誤", text: err.message, icon: "error" });
+      refreshCaptcha();
     }
   };
 
@@ -61,6 +76,34 @@ function AdminLoginPage() {
               onChange={handleLoginChange}
               required
             />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">驗證碼</label>
+            <div className="d-flex align-items-center">
+              <input
+                type="text"
+                name="captcha"
+                className="form-control"
+                value={captcha}
+                onChange={handleCaptchaChange}
+                required
+                maxLength={4}
+                autoComplete="off"
+                style={{ flex: 1, marginRight: 10 }} // 關鍵！
+              />
+              <img
+                src={captchaUrl}
+                alt="驗證碼"
+                onClick={refreshCaptcha}
+                style={{
+                  height: "38px",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  border: "1px solid #ced4da"
+                }}
+                title="點擊刷新"
+              />
+            </div>
           </div>
           <button type="submit" className="btn btn w-100 mt-3">
             登入

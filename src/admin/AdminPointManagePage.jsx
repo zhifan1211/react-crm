@@ -188,7 +188,7 @@ function AdminPointManagePage() {
         <div className="mb-2">
           <span>會員等級：</span>
           <span style={{ color: memberLevel === "PASSER" ? "#90484C" : "#3D6E73", fontWeight: "bold"}}>
-            {memberLevel === "PASSER" ? "非正式會員" : "正式會員"}
+            {memberLevel === "PASSER" ? "訪客會員" : "正式會員"}
           </span>
         </div>
         <div>
