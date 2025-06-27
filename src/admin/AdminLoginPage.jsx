@@ -1,25 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../config";
-import { showAlert, showConfirm } from "../utils/alert";
+import { showAlert } from "../utils/alert";
+import { useAuth } from "../context/AuthContext";
 
 function AdminLoginPage() {
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [captcha, setCaptcha] = useState("");
+  const [captchaUrl, setCaptchaUrl] = useState("");
+
+  const { setAdminLoggedIn } = useAuth();
   const navigate = useNavigate();
+
+  // 頁面一載入就抓一次 captcha
+  useEffect(() => {
+    refreshCaptcha();
+  }, []);
 
   const handleLoginChange = (e) => {
     const { name, value } = e.target;
     setLoginForm((prev) => ({ ...prev, [name]: value.trim() }));
   };
 
-  const [captcha, setCaptcha] = useState("");
-  const [captchaUrl, setCaptchaUrl] = useState(`${API_BASE}/admin/captcha`);
-
-  const refreshCaptcha = () => {
-    setCaptchaUrl(`${API_BASE}/admin/captcha?t=${Date.now()}`); // 加時間戳避免快取
-  };
-
   const handleCaptchaChange = (e) => setCaptcha(e.target.value);
+
+  // 重新載入驗證碼（解決 session 問題）
+  const refreshCaptcha = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/admin/captcha?t=${Date.now()}`, {
+        credentials: "include",
+      });
+      const blob = await res.blob();
+      setCaptchaUrl(URL.createObjectURL(blob));
+    } catch (err) {
+      console.error("載入驗證碼失敗", err);
+    }
+  };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -38,10 +54,11 @@ function AdminLoginPage() {
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
         showAlert({ title: "登入成功", icon: "success" });
+        setAdminLoggedIn(true); // 同步更新 context
         navigate("/admin");
       } else {
         showAlert({ title: "登入失敗", text: resData.message || "", icon: "error" });
-        refreshCaptcha(); // 登入失敗時刷新驗證碼
+        refreshCaptcha();
       }
     } catch (err) {
       showAlert({ title: "登入錯誤", text: err.message, icon: "error" });
@@ -50,7 +67,7 @@ function AdminLoginPage() {
   };
 
   return (
-   <div className="login-page d-flex align-items-center justify-content-center">
+    <div className="login-page d-flex align-items-center justify-content-center">
       <div className="login-card shadow p-4 rounded bg-white">
         <h2 className="mb-4 text-center brand-title">OTTER POINT</h2>
         <h5 className="mb-4 text-center">管理後台登入</h5>
@@ -89,20 +106,22 @@ function AdminLoginPage() {
                 required
                 maxLength={4}
                 autoComplete="off"
-                style={{ flex: 1, marginRight: 10 }} // 關鍵！
+                style={{ flex: 1, marginRight: 10 }}
               />
-              <img
-                src={captchaUrl}
-                alt="驗證碼"
-                onClick={refreshCaptcha}
-                style={{
-                  height: "38px",
-                  cursor: "pointer",
-                  borderRadius: "4px",
-                  border: "1px solid #ced4da"
-                }}
-                title="點擊刷新"
-              />
+              {captchaUrl && (
+                <img
+                  src={captchaUrl}
+                  alt="驗證碼"
+                  onClick={refreshCaptcha}
+                  style={{
+                    height: "38px",
+                    cursor: "pointer",
+                    borderRadius: "4px",
+                    border: "1px solid #ced4da",
+                  }}
+                  title="點擊刷新"
+                />
+              )}
             </div>
           </div>
           <button type="submit" className="btn btn w-100 mt-3">

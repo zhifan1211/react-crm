@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import { AuthProvider } from "./context/AuthContext";
+
 import HomePage from "./pages/HomePage";
 import MemberRegisterPage from "./pages/MemberRegisterPage";
 import MemberResetPasswordPage from "./pages/MemberResetPasswordPage";
@@ -23,27 +25,28 @@ import MemberItemListPage from "./member/MemberItemListPage";
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
 
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin" element={<AdminRouteGuard><AdminHomePage /></AdminRouteGuard>} />
-        <Route path="/admin/member" element={<AdminRouteGuard><AdminMemberListPage /></AdminRouteGuard>} />
-        <Route path="/admin/point-types" element={<AdminRouteGuard><AdminPointTypeListPage /></AdminRouteGuard>} />
-        <Route path="/admin/member/:memberId/point" element={<AdminRouteGuard><AdminPointManagePage /></AdminRouteGuard>}/>
-        <Route path="/admin/point-list" element={<AdminRouteGuard><AdminPointListPage /></AdminRouteGuard>} />
-        <Route path="/admin/manage-admins" element={<AdminRouteGuard><AdminManagePage /></AdminRouteGuard>} />
-        <Route path="/admin/item-list" element={<AdminRouteGuard><AdminItemListPage /></AdminRouteGuard>} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={<AdminRouteGuard><AdminHomePage /></AdminRouteGuard>} />
+          <Route path="/admin/member" element={<AdminRouteGuard><AdminMemberListPage /></AdminRouteGuard>} />
+          <Route path="/admin/point-types" element={<AdminRouteGuard><AdminPointTypeListPage /></AdminRouteGuard>} />
+          <Route path="/admin/member/:memberId/point" element={<AdminRouteGuard><AdminPointManagePage /></AdminRouteGuard>}/>
+          <Route path="/admin/point-list" element={<AdminRouteGuard><AdminPointListPage /></AdminRouteGuard>} />
+          <Route path="/admin/manage-admins" element={<AdminRouteGuard><AdminManagePage /></AdminRouteGuard>} />
+          <Route path="/admin/item-list" element={<AdminRouteGuard><AdminItemListPage /></AdminRouteGuard>} />
 
-        <Route path="/member/register" element={<MemberRegisterPage />} />
-        <Route path="/member/reset-password" element={<MemberResetPasswordPage />} />
-        <Route path="/member" element={<MemberRouteGuard><MemberCardPage /></MemberRouteGuard>} />
-        <Route path="/member/point" element={<MemberRouteGuard><MemberPointListPage /></MemberRouteGuard>} />
-        <Route path="/member/edit" element={<MemberRouteGuard><MemberEditPage /></MemberRouteGuard>} />
-        <Route path="/member/item-list" element={<MemberRouteGuard><MemberItemListPage /></MemberRouteGuard>} />
+          <Route path="/member/register" element={<MemberRegisterPage />} />
+          <Route path="/member/reset-password" element={<MemberResetPasswordPage />} />
+          <Route path="/member" element={<MemberRouteGuard><MemberCardPage /></MemberRouteGuard>} />
+          <Route path="/member/point" element={<MemberRouteGuard><MemberPointListPage /></MemberRouteGuard>} />
+          <Route path="/member/edit" element={<MemberRouteGuard><MemberEditPage /></MemberRouteGuard>} />
+          <Route path="/member/item-list" element={<MemberRouteGuard><MemberItemListPage /></MemberRouteGuard>} />
 
-        {/* <Route path="*" element={<h2>找不到頁面</h2>} /> */}
-      </Routes>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

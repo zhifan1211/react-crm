@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
 import { API_BASE } from "../../config";
-import { showAlert, showConfirm } from "../../utils/alert";
+import { showAlert } from "../../utils/alert";
+import { useAuth } from "../../context/AuthContext";
 
 function MemberLoginModal({ show, onClose }) {
   const [loginForm, setLoginForm] = useState({ phoneNumber: "", password: "" });
   const navigate = useNavigate();
+  const { setMemberLoggedIn } = useAuth();
 
   const handleLoginChange = (e) => {
     const { name, value } = e.target;
@@ -26,7 +28,8 @@ function MemberLoginModal({ show, onClose }) {
       const resData = await res.json();
       if (res.ok && resData.status === 200) {
         showAlert({ title: "登入成功！", icon: "success" });
-        onClose(); // 關閉 modal
+        setMemberLoggedIn(true); // 關鍵
+        onClose();
         navigate("/member");
       } else {
         showAlert({ title: "登入失敗", text: resData.message || "", icon: "error" });
